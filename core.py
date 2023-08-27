@@ -392,14 +392,21 @@ def crawl_data_from_table_extent(driver):
             div_row_path = div_tbody_path + "/div[{}]/div"
 
             div_tcell_one_path = div_row_path + "/div[1]"
-            div_tcell_address_path = (
-                div_tcell_one_path + "/descendant::div[@class='db-user-row']/div/div"
+            div_tcell_user_address_path = (
+                div_tcell_one_path + "/descendant::div[@class='db-user-row']/descendant::div[@class='db-user-name is-address']"
+            )
+            div_tcell_user_name_path = (
+                div_tcell_one_path + "/descendant::div[@class='db-user-row']/descendant::div[@class='db-user-name is-web3']"
             )
             div_tcell_taglisst_path = (
                 div_tcell_one_path + "/descendant::div[@class='db-user-tag-list']"
             )
             values_method_address = {
-                "element_xpath": div_tcell_address_path.format(index),
+                "element_xpath": div_tcell_user_address_path.format(index),
+                "method": "get_attribute_title",
+            }
+            values_method_name = {
+                "element_xpath": div_tcell_user_name_path.format(index),
                 "method": "get_attribute_title",
             }
             values_method_taglist = {
@@ -408,6 +415,9 @@ def crawl_data_from_table_extent(driver):
             }
             user_address = get_values_of_element_by_method(
                 driver, values_method_address
+            )
+            user_name = get_values_of_element_by_method(
+                driver, values_method_name
             )
             user_taglist = get_values_of_element_by_method(
                 driver, values_method_taglist
@@ -505,6 +515,7 @@ def crawl_data_from_table_extent(driver):
 
             table_row = {
                 "user_address": user_address,
+                "user_name": user_name,
                 "user_taglist": user_taglist,
                 "networth": networth,
                 "top_tokens": top_tokens,
