@@ -20,7 +20,7 @@ for item in combine_data:
         new_item = {
             'rank': count,
             'page': math.floor(count/20),
-            'row': count%20
+            'row': count % 20
 
         }
         blank_address.append(new_item)

@@ -343,9 +343,10 @@ def get_scroll(driver, scroll_percent=1):
     driver.execute_script(f"window.scrollBy(0, {scroll_length});")
 
 
-def get_values_of_element_by_method(driver, values_method_list):
+def get_values_of_element_by_method(driver, values_method_list, time_wait=10):
     # values_method_list = {"element_xpath": "element_xpath", "method": "text or get_attribute..."}
     # driver.implicitly_wait(5)
+    driver.implicitly_wait(time_wait)
     element_xpath, method = (
         values_method_list["element_xpath"],
         values_method_list["method"],
@@ -375,21 +376,22 @@ def get_values_of_element_by_method(driver, values_method_list):
     return values
 
 
-def crawl_data_from_table_extent(driver):
+def crawl_data_from_table_extent(driver, time_wait=10):
     table_data = []
-
     div_tbody_path = "//div[@class='db-table-body']"
     div_total_rows_path = div_tbody_path + "/div"
 
+    driver.implicitly_wait(time_wait)
     rows_web_element = driver.find_elements(By.XPATH, div_total_rows_path)
     rows = len(rows_web_element)
 
     index = 1
     while index <= rows:
+        tableData = read_json_file('D:\DEBANK\data', 'TableData.json')
         try:
             print(f"row: {index}")
 
-            div_row_path = div_tbody_path + "/div[{}]/div"
+            div_row_path = div_tbody_path + "/div[{}]/div[@class='db-table-row']"
 
             div_tcell_one_path = div_row_path + "/div[1]"
             div_tcell_user_address_path = (
@@ -414,13 +416,13 @@ def crawl_data_from_table_extent(driver):
                 "method": "text",
             }
             user_address = get_values_of_element_by_method(
-                driver, values_method_address
+                driver, values_method_address, time_wait
             )
             user_name = get_values_of_element_by_method(
-                driver, values_method_name
+                driver, values_method_name, time_wait
             )
             user_taglist = get_values_of_element_by_method(
-                driver, values_method_taglist
+                driver, values_method_taglist, time_wait
             )
 
             div_tcell_two_path = div_row_path + "/div[2]"
@@ -429,7 +431,7 @@ def crawl_data_from_table_extent(driver):
                 "element_xpath": div_tcell_networth_path.format(index),
                 "method": "text",
             }
-            networth = get_values_of_element_by_method(driver, values_method_networth)
+            networth = get_values_of_element_by_method(driver, values_method_networth, time_wait)
 
             div_tcell_three_path = div_row_path + "/div[3]"
             div_tcell_top_tokens_path = div_tcell_three_path + "/div"
@@ -458,10 +460,10 @@ def crawl_data_from_table_extent(driver):
                     }
 
                     token_img_url = get_values_of_element_by_method(
-                        driver, values_method_token_img_url
+                        driver, values_method_token_img_url, time_wait
                     )
                     token_percent = get_values_of_element_by_method(
-                        driver, values_method_token_percent
+                        driver, values_method_token_percent, time_wait
                     )
 
                     token_info = {
@@ -501,10 +503,10 @@ def crawl_data_from_table_extent(driver):
                     }
 
                     protocol_img_url = get_values_of_element_by_method(
-                        driver, values_method_protocol_img_url
+                        driver, values_method_protocol_img_url, time_wait
                     )
                     protocol_percent = get_values_of_element_by_method(
-                        driver, values_method_protocol_percent
+                        driver, values_method_protocol_percent, time_wait
                     )
 
                     protocol_info = {
@@ -524,6 +526,8 @@ def crawl_data_from_table_extent(driver):
 
             print(table_row)
             table_data.append(table_row)
+            tableData.append(table_row)
+            write_json_file('D:\DEBANK\data', 'TableData.json', tableData)
             index += 1
         except NoSuchElementException:
             index += 1
@@ -538,7 +542,7 @@ def single_object_crawl(url, time_wait=10, driver=None):
         driver = create_driver()
 
     go_to_web_url(driver, url)
-    sleep_milliseconds(1500)
+    sleep_milliseconds(3000)
 
     driver.implicitly_wait(time_wait)
 
@@ -560,7 +564,9 @@ def single_object_crawl(url, time_wait=10, driver=None):
             page_element_xpath = "//ul/li[@title='{}']"
             click_element_xpath = page_element_xpath.format(page_index)
             click_element_by_script(driver, click_element_xpath)
-            sleep_milliseconds(2000)
+            sleep_milliseconds(1500)
+            driver.refresh()
+            sleep_milliseconds(1500)
             get_scroll(driver, 0)
         except NoSuchElementException:
             page_index += 1
